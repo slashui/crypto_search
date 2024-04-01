@@ -27,8 +27,9 @@ app.post('/', async (req, res) => {
   // 7. Extract request data
   const { message, returnSources = true, returnFollowUpQuestions = true, embedSourcesInLLMResponse = false, textChunkSize = 800, textChunkOverlap = 200, numberOfSimilarityResults = 2, numberOfPagesToScan = 4 } = req.body;
   console.log(`2. Destructured request data`);
-  console.log("Hello")
-  console.log(message)
+
+  console.log(message);
+  console.log("Hello");
   // // 判断是不是crypto的话题，
   // async function iftopic(inputString) {
   //   console.log(`4. 判断话题`);
