@@ -269,8 +269,9 @@ const relevantQuestions = async (sources: SearchResult[]): Promise<any> => {
 };
 // 10. Main action function that orchestrates the entire process
 async function myAction(userMessage: string): Promise<any> {
+  "use server";
   console.log("Hello")
-  // "use server";
+
   // const streamable = createStreamableValue({});
   // (async () => {
   //   const [images, sources, videos] = await Promise.all([
