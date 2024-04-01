@@ -267,46 +267,68 @@ const relevantQuestions = async (sources: SearchResult[]): Promise<any> => {
     response_format: { type: "json_object" },
   });
 };
+
+  // 判断是不是crypto的话题，
+  async function iftopic(inputString:string) {
+    console.log(`4. 判断话题`);
+    // 9. Rephrase input using Groq
+    const groqResponse = await openai.chat.completions.create({
+      model: "mixtral-8x7b-32768",
+      messages: [
+        { role: "system", content: "你来判断下面的句子是不是加密货币行业相关的，如果是，就返回“yes”，不是就返回“no”。只有这两个单词，不需要任何理由。" },
+        { role: "user", content: inputString },
+      ],
+    });
+    console.log(`5. Rephrased input and got answer from Groq`);
+    return groqResponse.choices[0].message.content;
+  }
+
+
+
 // 10. Main action function that orchestrates the entire process
 async function myAction(userMessage: string): Promise<any> {
   "use server";
-  console.log("Hello")
 
-  // const streamable = createStreamableValue({});
-  // (async () => {
-  //   const [images, sources, videos] = await Promise.all([
-  //     getImages(userMessage),
-  //     getSources(userMessage),
-  //     getVideos(userMessage),
-  //   ]);
-  //   streamable.update({ 'searchResults': sources });
-  //   streamable.update({ 'images': images });
-  //   streamable.update({ 'videos': videos });
-  //   const html = await get10BlueLinksContents(sources);
-  //   const vectorResults = await processAndVectorizeContent(html, userMessage);
-  //   const chatCompletion = await openai.chat.completions.create({
-  //     messages:
-  //       [{
-  //         role: "system", content: `
-  //         - Here is my query "${userMessage}", respond back with an answer that is as long as possible. If you can't find any relevant results, respond with "No relevant results found." `
-  //       },
-  //       { role: "user", content: ` - Here are the top results from a similarity search: ${JSON.stringify(vectorResults)}. ` },
-  //       ], stream: true, model: config.inferenceModel
-  //   });
-  //   for await (const chunk of chatCompletion) {
-  //     if (chunk.choices[0].delta && chunk.choices[0].finish_reason !== "stop") {
-  //       streamable.update({ 'llmResponse': chunk.choices[0].delta.content });
-  //     } else if (chunk.choices[0].finish_reason === "stop") {
-  //       streamable.update({ 'llmResponseEnd': true });
-  //     }
-  //   }
-  //   if (!config.useOllamaInference) {
-  //     const followUp = await relevantQuestions(sources);
-  //     streamable.update({ 'followUp': followUp });
-  //   }
-  //   streamable.done({ status: 'done' });
-  // })();
-  // return streamable.value;
+  const streamable = createStreamableValue({});
+
+  const isCryptoRelated = await iftopic(userMessage);
+  console.log(isCryptoRelated);
+
+
+  (async () => {
+    const [images, sources, videos] = await Promise.all([
+      getImages(userMessage),
+      getSources(userMessage),
+      getVideos(userMessage),
+    ]);
+    streamable.update({ 'searchResults': sources });
+    streamable.update({ 'images': images });
+    streamable.update({ 'videos': videos });
+    const html = await get10BlueLinksContents(sources);
+    const vectorResults = await processAndVectorizeContent(html, userMessage);
+    const chatCompletion = await openai.chat.completions.create({
+      messages:
+        [{
+          role: "system", content: `
+          - Here is my query "${userMessage}", respond back with an answer that is as long as possible. If you can't find any relevant results, respond with "No relevant results found." `
+        },
+        { role: "user", content: ` - Here are the top results from a similarity search: ${JSON.stringify(vectorResults)}. ` },
+        ], stream: true, model: config.inferenceModel
+    });
+    for await (const chunk of chatCompletion) {
+      if (chunk.choices[0].delta && chunk.choices[0].finish_reason !== "stop") {
+        streamable.update({ 'llmResponse': chunk.choices[0].delta.content });
+      } else if (chunk.choices[0].finish_reason === "stop") {
+        streamable.update({ 'llmResponseEnd': true });
+      }
+    }
+    if (!config.useOllamaInference) {
+      const followUp = await relevantQuestions(sources);
+      streamable.update({ 'followUp': followUp });
+    }
+    streamable.done({ status: 'done' });
+  })();
+  return streamable.value;
 }
 // 11. Define initial AI and UI states
 const initialAIState: {
