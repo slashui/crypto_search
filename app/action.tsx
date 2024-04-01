@@ -304,7 +304,7 @@ async function myAction(userMessage: string): Promise<any> {
 
 
   (async () => {
-    console.log("Hello");
+    console.log(userMessage);
     // const [images, sources, videos] = await Promise.all([
     //   getImages(userMessage),
     //   getSources(userMessage),
