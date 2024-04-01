@@ -298,50 +298,44 @@ async function myAction(userMessage: string): Promise<any> {
   "use server";
 
   const streamable = createStreamableValue({});
-  const isCryptoRelated = await iftopic(userMessage);
-  console.log(isCryptoRelated); // 输出 'yes' 或 'no'
-
-  if (isCryptoRelated === 'no') {
-    // 如果用户查询与加密货币无关,直接返回提示
-    streamable.update({ 'llmResponse': 'Your query does not seem to be related to crypto. Please try a different query.' });
-    streamable.done({ status: 'done' });
-    return streamable.value;
-  }
+  
+  
   
 
 
   (async () => {
-    const [images, sources, videos] = await Promise.all([
-      getImages(userMessage),
-      getSources(userMessage),
-      getVideos(userMessage),
-    ]);
-    streamable.update({ 'searchResults': sources });
-    streamable.update({ 'images': images });
-    streamable.update({ 'videos': videos });
-    const html = await get10BlueLinksContents(sources);
-    const vectorResults = await processAndVectorizeContent(html, userMessage);
-    const chatCompletion = await openai.chat.completions.create({
-      messages:
-        [{
-          role: "system", content: `
-          - Here is my query "${userMessage}", respond back with an answer that is as long as possible. If you can't find any relevant results, respond with "No relevant results found." `
-        },
-        { role: "user", content: ` - Here are the top results from a similarity search: ${JSON.stringify(vectorResults)}. ` },
-        ], stream: true, model: config.inferenceModel
-    });
-    for await (const chunk of chatCompletion) {
-      if (chunk.choices[0].delta && chunk.choices[0].finish_reason !== "stop") {
-        streamable.update({ 'llmResponse': chunk.choices[0].delta.content });
-      } else if (chunk.choices[0].finish_reason === "stop") {
-        streamable.update({ 'llmResponseEnd': true });
-      }
-    }
-    if (!config.useOllamaInference) {
-      const followUp = await relevantQuestions(sources);
-      streamable.update({ 'followUp': followUp });
-    }
-    streamable.done({ status: 'done' });
+    console.log("Hello");
+    // const [images, sources, videos] = await Promise.all([
+    //   getImages(userMessage),
+    //   getSources(userMessage),
+    //   getVideos(userMessage),
+    // ]);
+    // streamable.update({ 'searchResults': sources });
+    // streamable.update({ 'images': images });
+    // streamable.update({ 'videos': videos });
+    // const html = await get10BlueLinksContents(sources);
+    // const vectorResults = await processAndVectorizeContent(html, userMessage);
+    // const chatCompletion = await openai.chat.completions.create({
+    //   messages:
+    //     [{
+    //       role: "system", content: `
+    //       - Here is my query "${userMessage}", respond back with an answer that is as long as possible. If you can't find any relevant results, respond with "No relevant results found." `
+    //     },
+    //     { role: "user", content: ` - Here are the top results from a similarity search: ${JSON.stringify(vectorResults)}. ` },
+    //     ], stream: true, model: config.inferenceModel
+    // });
+    // for await (const chunk of chatCompletion) {
+    //   if (chunk.choices[0].delta && chunk.choices[0].finish_reason !== "stop") {
+    //     streamable.update({ 'llmResponse': chunk.choices[0].delta.content });
+    //   } else if (chunk.choices[0].finish_reason === "stop") {
+    //     streamable.update({ 'llmResponseEnd': true });
+    //   }
+    // }
+    // if (!config.useOllamaInference) {
+    //   const followUp = await relevantQuestions(sources);
+    //   streamable.update({ 'followUp': followUp });
+    // }
+    // streamable.done({ status: 'done' });
   })();
   return streamable.value;
 }
