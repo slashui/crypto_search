@@ -27,23 +27,24 @@ app.post('/', async (req, res) => {
   // 7. Extract request data
   const { message, returnSources = true, returnFollowUpQuestions = true, embedSourcesInLLMResponse = false, textChunkSize = 800, textChunkOverlap = 200, numberOfSimilarityResults = 2, numberOfPagesToScan = 4 } = req.body;
   console.log(`2. Destructured request data`);
-
-  // 判断是不是crypto的话题，
-  async function iftopic(inputString) {
-    console.log(`4. 判断话题`);
-    // 9. Rephrase input using Groq
-    const groqResponse = await openai.chat.completions.create({
-      model: "mixtral-8x7b-32768",
-      messages: [
-        { role: "system", content: "你来判断下面的句子是不是加密货币行业相关的，如果是，就返回“yes”，不是就返回“no”。只有这两个单词，不需要任何理由。" },
-        { role: "user", content: inputString },
-      ],
-    });
-    console.log(`5. Rephrased input and got answer from Groq`);
-    return groqResponse.choices[0].message.content;
-  }
-  const topicResult = await iftopic(message);
-  alert(`3. Topic determination result: ${topicResult}`);
+  console.log("Hello")
+  console.log(message)
+  // // 判断是不是crypto的话题，
+  // async function iftopic(inputString) {
+  //   console.log(`4. 判断话题`);
+  //   // 9. Rephrase input using Groq
+  //   const groqResponse = await openai.chat.completions.create({
+  //     model: "mixtral-8x7b-32768",
+  //     messages: [
+  //       { role: "system", content: "你来判断下面的句子是不是加密货币行业相关的，如果是，就返回“yes”，不是就返回“no”。只有这两个单词，不需要任何理由。" },
+  //       { role: "user", content: inputString },
+  //     ],
+  //   });
+  //   console.log(`5. Rephrased input and got answer from Groq`);
+  //   return groqResponse.choices[0].message.content;
+  // }
+  // const topicResult = await iftopic(message);
+  // alert(`3. Topic determination result: ${topicResult}`);
 
 
 
